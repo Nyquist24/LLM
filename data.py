@@ -10,7 +10,7 @@ from PIL import Image
 from torch.utils.data import Dataset
 from transformers import AutoProcessor
 
-
+fdsdfsfd 
 @dataclass
 class QaImageOutput:
     q_input_ids: torch.Tensor
