@@ -5,7 +5,7 @@ import uvicorn
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
-from train_llava.data_websend import SendDatasetByWeb
+from llava_clip_qwen.data_websend import SendDatasetByWeb
 
 
 webdatasetsend = SendDatasetByWeb(
