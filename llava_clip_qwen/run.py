@@ -18,27 +18,16 @@ from transformers import (
     TrainingArguments,
 )
 
-from train_llava.custom_trainer import WebTrainer
-from train_llava.data import LlavaDataset, TrainLLavaModelCollator
-# from train_llava.data_websend import DatasetReceiveByWeb, TrainLlavaModelCollatorByWeb
-from train_llava.util import print_trainable_parameters
+from llava_clip_qwen.custom_trainer import WebTrainer
+from llava_clip_qwen.build_data import LlavaDataset, TrainLLavaModelCollator
+from llava_clip_qwen.util import print_trainable_parameters
 
 logger = logging.getLogger(__name__)
-
-# import debugpy
-
-# try:
-#     # 5678 is the default attach port in the VS Code debug configurations. Unless a host and port are specified, host defaults to 127.0.0.1
-#     debugpy.listen(("localhost", 9501))
-#     print("Waiting for debugger attach")
-#     debugpy.wait_for_client()
-# except Exception as e:
-#     pass
 
 
 @dataclass
 class ModelArguments:
-    model_name_or_path: Optional[str] = field(default="test_model/model001")
+    model_name_or_path: Optional[str] = field(default="build_llava/qwen")
     train_type: Optional[str] = field(
         default="none",
         metadata={
@@ -53,19 +42,11 @@ class ModelArguments:
 
 @dataclass
 class DataArguments:
-    data_path: str = field(
-        default=None, metadata={"help": "Path to the training data."}
-    )
-    # source_length: int = field(default=128)
-    # target_length: int = field(default=512)
+    data_path: str = field(default=None, metadata={"help": "Path to the training data."})
 
 
 def load_model_processor(modelargs: ModelArguments):
-    model = LlavaForConditionalGeneration.from_pretrained(
-        modelargs.model_name_or_path,
-        torch_dtype=torch.bfloat16,
-        low_cpu_mem_usage=True,
-    )
+    model = LlavaForConditionalGeneration.from_pretrained(modelargs.model_name_or_path,torch_dtype=torch.bfloat16,low_cpu_mem_usage=True,)
     processor = LlavaProcessor.from_pretrained(modelargs.model_name_or_path)
 
     if modelargs.train_type == "use_lora":
@@ -95,7 +76,7 @@ def load_model_processor(modelargs: ModelArguments):
 
         pass
     elif modelargs.train_type == "freeze_vision":
-        logging.warning("冻结vision_tower网络层，剩下的网络权重进行训练")
+        logging.warning("冻结clip.vision_tower,对qwen进行训练")
 
         for param in model.vision_tower.parameters():
             param.requires_grad = False
@@ -104,20 +85,16 @@ def load_model_processor(modelargs: ModelArguments):
     return model, processor
 
 
-def load_dataset_collator(processor, dataargs: DataArguments):
+def load_dataset_collator(processor, data_args: DataArguments):
 
-    llava_dataset = LlavaDataset(
-        dataargs.data_path  # "data/liuhaotian/LLaVA-CC3M-Pretrain-595K"
-    )
+    llava_dataset = LlavaDataset(data_args.data_path  )
     data_collator = TrainLLavaModelCollator(processor, -100)
 
     return llava_dataset, data_collator
 
 
 def train():
-    parser = transformers.HfArgumentParser(
-        (ModelArguments, DataArguments, TrainingArguments)
-    )
+    parser = transformers.HfArgumentParser((ModelArguments, DataArguments, TrainingArguments))
     model_args, data_args, training_args = parser.parse_args_into_dataclasses()
     model, processor = load_model_processor(model_args)
     train_dataset, data_collator = load_dataset_collator(processor, data_args)

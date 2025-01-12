@@ -2,7 +2,7 @@
 
 deepspeed --include localhost:4,5,6,7 run.py \
     --deepspeed ds_zero2_no_offload.json \
-    --model_name_or_path test_model/model001 \
+    --model_name_or_path build_llava/qwen \
     --train_type use_lora \
     --data_path data/liuhaotian/LLaVA-CC3M-Pretrain-595K \
     --remove_unused_columns false \

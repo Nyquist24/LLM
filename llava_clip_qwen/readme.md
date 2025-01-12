@@ -1,9 +1,31 @@
 # 训练llava
 
+
+
+
+
+
+
 1. 模型构建：基于`openai/clip-vit-large-patch14-336` 和`Qwen1.5-4B-Chat`模型，构建一个llava模型
 2. 数据构建：`liuhaotian/LLaVA-CC3M-Pretrain-595K`
 3. 训练方式：基于`deepspeed-zero2`，有`lora`训练、全量参数训练、冻结视觉层进行训练等方式。
 
+
+### Prepared
+
+- pip install -U huggingface_hub
+- export HF_ENDPOINT=https://hf-mirror.com
+
+- huggingface-cli download --resume-download Qwen/Qwen1.5-4B-Chat --local-dir Qwen1.5-4B-Chat --local-dir-use-symlinks False
+- huggingface-cli download --resume-download llava-hf/llava-1.5-7b-hf --local-dir llava-1.5-7b-hf --local-dir-use-symlinks False
+- huggingface-cli download --resume-download openai/clip-vit-large-patch14-336 --local-dir openai/clip-vit-large-patch14-336 --local-dir-use-symlinks False
+- huggingface-cli download --repo-type dataset --resume-download liuhaotian/LLaVA-CC3M-Pretrain-595K --local-dir /data/LLaVA-CC3M-Pretrain-595K --local-dir-use-symlinks False
+
+1. 需要设置`<image>`这个token id，从之前的多个，设置成一个
+2. 需要设置pad_token_id
+3. 将clip模型的vision_model模块进行提取
+4. 将language_model模块进行提取
+5. 相关文件复制
 ## 具体教程
 
 | 任务流程          | 细节                                                        | 关联代码                                                                                                                                                                                                                                                                    | 关联视频                                                                                                                  |
